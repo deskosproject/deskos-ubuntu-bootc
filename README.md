@@ -1,4 +1,4 @@
-# deskos-ubuntu-base
+# deskos-ubuntu-bootc
 
 **Ubuntu 26.04 LTS as a bootc image with GNOME**, maintained by the DeskOS project.
 
@@ -171,7 +171,7 @@ image across with `podman save | sudo podman load`.
       -v /var/tmp/ubuntu-oci:/src-oci:ro -v $PWD:/output \
       localhost/ubuntu-bootc:local bootc install to-disk --via-loopback /output/disk.raw \
       --source-imgref oci:/src-oci:local \
-      --target-imgref quay.io/deskos/deskos-ubuntu-base:26.04 \
+      --target-imgref quay.io/deskos/deskos-ubuntu-bootc:26.04 \
       --composefs-backend --bootloader systemd --wipe --filesystem ext4 --allow-missing-verity
 
     # boot with a virtual GPU: without it there is no compositor. The firmware's

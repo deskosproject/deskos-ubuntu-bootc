@@ -117,8 +117,8 @@ COPY usr/ usr/
 # absent it creates the whole thing. A directory a tool fails on with "no such file" over a config
 # file inside it belongs in this list.
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    install -d /usr/share/deskos-ubuntu-base && \
-    find /var -type d -printf '%m %u %g %p\n' | sort > /usr/share/deskos-ubuntu-base/var-skeleton && \
+    install -d /usr/share/deskos-ubuntu-bootc && \
+    find /var -type d -printf '%m %u %g %p\n' | sort > /usr/share/deskos-ubuntu-bootc/var-skeleton && \
     install -d /usr/lib/sysimage && cp -a /var/lib/dpkg /usr/lib/sysimage/dpkg && \
     mkdir -p /etc/dpkg/dpkg.cfg.d && \
     printf 'admindir=/usr/lib/sysimage/dpkg\n' > /etc/dpkg/dpkg.cfg.d/99-admindir && \
@@ -126,7 +126,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     printf 'Dir::State::status "/usr/lib/sysimage/dpkg/status";\n' > /etc/apt/apt.conf.d/99-admindir && \
     echo "HOME=/var/home" | tee -a "/etc/default/useradd" && \
     /ctx/shared/bootc-rootfs.sh && \
-    while read -r m u g p; do install -d -m "$m" -o "$u" -g "$g" "$p"; done < /usr/share/deskos-ubuntu-base/var-skeleton && \
+    while read -r m u g p; do install -d -m "$m" -o "$u" -g "$g" "$p"; done < /usr/share/deskos-ubuntu-bootc/var-skeleton && \
     rm -rf /var/lib/flatpak && \
     systemctl enable snap.mount home.mount root.mount opt.mount mnt.mount srv.mount
 
