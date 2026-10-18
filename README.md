@@ -1,4 +1,4 @@
-# deskos-ubuntu-base
+# deskos-ubuntu-bootc
 
 **Ubuntu 26.04 LTS as a bootc image with GNOME**, maintained by the DeskOS project.
 
