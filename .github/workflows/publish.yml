@@ -36,7 +36,7 @@ concurrency:
 
 env:
   IMAGE: localhost/ubuntu-bootc:local
-  DEST: quay.io/deskos/deskos-ubuntu-base
+  DEST: quay.io/deskos/deskos-ubuntu-bootc
   # The large artifacts (image, OCI layout, disk, overlays) live on /mnt; the
   # root disk is small and the build is heavy.
   WORK: /mnt/deskos-work
