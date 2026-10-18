@@ -166,13 +166,14 @@ jobs:
           ref="$DEST@$digest"
           printf '%s' "$QUAY_ROBOT_TOKEN" | cosign login quay.io --username "$QUAY_ROBOT_USERNAME" --password-stdin
           cosign sign --yes "$ref"
+          # The identity below carries the repository name, and this repository was renamed
+          # from `deskos-ubuntu-base` to `deskos-ubuntu-bootc`: the pattern accepts both while
+          # the rename settles, so a run either side of it verifies. Narrow it to the new name
+          # once nothing is signed under the old one. (A comment, and not one between the
+          # continuations: a backslash-newline joins the lines *before* the shell looks for a
+          # `#`, which silently commented the flag out of the command the first time.)
           cosign verify "$ref" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-            # This repository was renamed from `deskos-ubuntu-base` to `deskos-ubuntu-bootc`,
-            # and the OIDC identity a workflow signs with carries the repository name. The
-            # pattern accepts both while the rename settles, so a run either side of it
-            # verifies; it can be narrowed to the new name once nothing is signed under the
-            # old one.
             --certificate-identity-regexp '^https://github\.com/deskosproject/deskos-ubuntu-(base|bootc)/' | tee cosign-verify.txt
           # The moving tags move only after the signature is verified, and only
           # when the registry hands back the digest that was signed.
