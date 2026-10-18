@@ -168,7 +168,12 @@ jobs:
           cosign sign --yes "$ref"
           cosign verify "$ref" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-            --certificate-identity-regexp '^https://github\.com/deskosproject/deskos-ubuntu-base/' | tee cosign-verify.txt
+            # This repository was renamed from `deskos-ubuntu-base` to `deskos-ubuntu-bootc`,
+            # and the OIDC identity a workflow signs with carries the repository name. The
+            # pattern accepts both while the rename settles, so a run either side of it
+            # verifies; it can be narrowed to the new name once nothing is signed under the
+            # old one.
+            --certificate-identity-regexp '^https://github\.com/deskosproject/deskos-ubuntu-(base|bootc)/' | tee cosign-verify.txt
           # The moving tags move only after the signature is verified, and only
           # when the registry hands back the digest that was signed.
           for tag in 26.04 latest; do
