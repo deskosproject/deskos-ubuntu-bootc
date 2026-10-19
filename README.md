@@ -1,14 +1,29 @@
 # deskos-ubuntu-bootc
 
-**Ubuntu 26.04 LTS as a bootc image with GNOME**, maintained by the DeskOS project.
+**Ubuntu 26.04 LTS as a bootc base image with GNOME**, maintained by the DeskOS
+project — because Canonical publishes no bootc base of its own.
+
+You almost certainly do not want this image directly: it is the **base** a DeskOS
+workstation compiles onto. Install the workstation, not the base:
+
+```bash
+sudo bootc switch quay.io/deskos/deskos-ubuntu:26.04
+```
+
+The workstation image is built in
+[`deskos-ubuntu`](https://github.com/deskosproject/deskos-ubuntu), and it starts
+`FROM` this base pinned by digest. Use this repository when you need to change
+the base itself — a new Ubuntu point release, a kernel, a bootc fix — or when you
+are auditing what the base is.
 
 **Owner: the Project DeskOS. Support tier: `organization`.** Canonical publishes no Ubuntu bootc base,
 so DeskOS maintains this one — and *organization* is exactly what that tier means: nothing here is
 backed by the operating system's vendor, and the Project DeskOS is the named owner accountable for
 this base, its fixes and its updates. (The other tier is `vendor`, for a base the vendor itself
 publishes and supports, as Red Hat does for RHEL 10.) Fixes and updates are proposed as pull requests
-here and reviewed by the project, and the base is consumed by digest. `deskos-core` declares the same
-owner and tier in the `Platform` resource that points here (ADR 0014). See "Provenance" and "Verified
+here and reviewed by the project, and the base is consumed by digest. The `Platform` resource that points
+here lives in [`deskos-ubuntu`](https://github.com/deskosproject/deskos-ubuntu) and declares the
+same owner and tier (ADR 0014). See "Provenance" and "Verified
 status" to know what was tested and what was not.
 
 This repository is **not DeskOS Core**. It is the *base* DeskOS compiles onto: the Ubuntu bootc
@@ -51,7 +66,7 @@ Everything below is **measured** (the recipe was built, installed to disk and bo
    — only exists since 1.17. The spike got a newer one from the Flatpak team PPA, which is not
    Canonical's archive; carrying a moving third-party PPA inside a base is a supply-chain decision
    this project declined (ADR 0010). A platform that wants a system Flatpak channel needs a base
-   that carries one and says so, and `deskos-core` declares that Ubuntu offers none.
+   that carries one and says so, and the `Platform` resource in `deskos-ubuntu` declares that Ubuntu offers none.
 5. **Locales generated in the image** (`en_US.UTF-8` and `es_EC.UTF-8`), defaulting to
    `en_US.UTF-8`. It cannot be done at runtime: `/usr/lib/locale` lives under a read-only `/usr`.
    The timezone and the keyboard are **not** pinned: GNOME Initial Setup chooses them per user at
@@ -60,7 +75,7 @@ Everything below is **measured** (the recipe was built, installed to disk and bo
    uid-1000 `ubuntu` account the upstream *container* image ships is removed (`userdel`, asserted at
    build time). That was not cosmetic. GDM starts GNOME Initial Setup only when **no user exists**,
    and it asks AccountsService, which counted that account — so the wizard never ran. Measured on
-   2026-10-16 by `deskos-core`'s `tests/vm/firstbootcheck.py`, which asks the guest instead of reading
+   2026-10-16 by `tests/vm/firstbootcheck.py`, vendored from `deskos-core`, which asks the guest instead of reading
    a screenshot: with the account gone, the wizard is the session that comes up, and no account can
    log in. An organization that provisions accounts itself suppresses the wizard in its own layer.
 7. **`/var` skeleton that `rm -rf /var` destroys.** Packages install directories under `/var`
@@ -97,7 +112,7 @@ Everything below is **measured** (the recipe was built, installed to disk and bo
 | `bootc container lint` | 11 checks passed, 1 skipped, 3 warnings — the same lint set as before, on the 2026-10-16 rebuild |
 | Install to disk (`--composefs-backend`) | OK — 2026-10-16 rebuild, installed out of a compressed OCI layout |
 | Boot from digest-verified ComposeFS | OK — the 2026-10-16 rebuild's ESP entry asks for it (`composefs.digest=…`); the mount flags seen inside the guest were measured on an earlier build, so `verity=require` as such is not re-asserted here |
-| Boot to GNOME Initial Setup | OK — 2026-10-16 rebuild: the wizard is the session that comes up, asserted by asking the guest (`deskos-core`'s `tests/vm/firstbootcheck.py`). It did **not** run before this base removed the inherited `ubuntu` account: GDM counts users through AccountsService, and that uid-1000 account suppressed it. A screendump could not tell the two apart, because GDM's greeter draws a Username field too |
+| Boot to GNOME Initial Setup | OK — 2026-10-16 rebuild: the wizard is the session that comes up, asserted by asking the guest (`tests/vm/firstbootcheck.py`, vendored from `deskos-core`). It did **not** run before this base removed the inherited `ubuntu` account: GDM counts users through AccountsService, and that uid-1000 account suppressed it. A screendump could not tell the two apart, because GDM's greeter draws a Username field too |
 | No usable account | OK — the image carries no account at all: the upstream container image's `ubuntu` account is removed at build time |
 | Flatpak | **not in the image** (item 4): 26.04 has no `flatpak preinstall`, and carrying the PPA that would provide one is declined. Earlier runs, still with that PPA, measured Flatpak 1.18.4 running apps (bwrap under the `unpriv_bwrap` profile) and installing one at first boot; that is no longer this base's state |
 | GNOME + autologin | OK, measured **before** the autologin was removed; not re-measured since |
