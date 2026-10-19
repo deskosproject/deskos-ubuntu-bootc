@@ -99,8 +99,10 @@ Everything below is **measured** (the recipe was built, installed to disk and bo
    packages, 34 of them already on disk**, because dpkg knew nothing. The database is now copied into
    `/usr/lib/sysimage/dpkg` before the wipe (the RPM family keeps its own at
    `/usr/lib/sysimage/rpm`), with `admindir=` in `/etc/dpkg/dpkg.cfg.d/` and `Dir::State::status` in
-   `/etc/apt/apt.conf.d/`. **Measured: `dpkg -l` reports 1519 packages, `curl` resolves to 1 package,
-   `jq` to 0, and a derived `FROM` this base installing `jq` reports "already the newest version".**
+   `/etc/apt/apt.conf.d/`. **Measured on an earlier build (it still carried Flatpak, hence 1519 rather
+   than the 1509 of the 2026-10-16 rebuild below): `dpkg -l` reports 1519 packages,
+   `curl` resolves to 1 package, `jq` to 0, and a derived `FROM` this base
+   installing `jq` reports "already the newest version".**
    The database lives in `/usr`, so on a booted machine it is readable but not writable: `apt` is a
    build-time tool here, not a way to change a running workstation.
 
