@@ -147,6 +147,26 @@ nothing about those rows, but until they are re-run they are history, not status
   reports as `Invalid age '-d'` on every boot. The age field `-` is fine (it means "do not clean up");
   the missing newline was the bug. Fixed 2026-10-16 by ending both `printf`s in `\n`.
 
+## Known upstream issue: `bootc-image-builder` on kernel 7.0
+
+This base runs Ubuntu 26.04's stock kernel, `7.0.x`. On a host with that kernel,
+`bootc-image-builder` aborts at `org.osbuild.container-deploy`:
+
+    RuntimeError: mount: /run/osbuild/containers/storage: permission denied. (code: 32)
+
+osbuild's `MountGuard` issues a `mount(2)` carrying `MS_PRIVATE` together with
+`MS_REMOUNT`, and the kernel refuses it. It is **not** privileges and **not**
+AppArmor: a plain `--privileged` container mounts fine on the same host, and
+`--security-opt apparmor=unconfined` changes nothing. Measured between two
+GitHub-hosted runner images: kernel 6.17 works, 7.0 fails. Tracked in
+[osbuild#2579](https://github.com/osbuild/osbuild/issues/2579).
+
+That is one of the reasons the recipe here installs with `bootc install to-disk`
+from a compressed OCI layout instead of asking `bootc-image-builder` for a qcow2 or
+an ISO: the install path does not go through osbuild. If you need one of those for
+this platform, build it on a host that is not running kernel 7.0 until the issue
+lands.
+
 ## Operational note (for whoever builds this)
 
 - **Compiling `bootc` from scratch is heavy.** With 3 VMs running, `rustc` died with a **SIGSEGV**
